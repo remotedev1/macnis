@@ -2,13 +2,6 @@ import { db } from "@/lib/db";
 import { imageKit } from "@/lib/imageKit";
 import { NextResponse } from "next/server";
 
-// Important! Disable Next.js built-in body parser for file uploads
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export async function GET() {
   const projects = await db.projects.findMany();
   return NextResponse.json(projects);
