@@ -90,10 +90,11 @@ model Projects {
   keyFeatures      KeyFeature[] // Array of objects with title + description
   technologiesUsed String[]
 
-  imageGallery String[]
-  videos       String[]
-
-  status ProjectStatus @default(ACTIVE)
+  imageGallery   ImageGallery[]
+  youtubeLinks   String[]
+  instagramLinks String[]
+  status         ProjectStatus  @default(ACTIVE)
+  isArchived     Boolean        @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,6 +103,11 @@ model Projects {
 type KeyFeature {
   title       String
   description String
+}
+
+type ImageGallery {
+  url    String
+  fileId String
 }
 
 model Images {

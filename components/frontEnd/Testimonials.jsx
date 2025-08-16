@@ -11,21 +11,21 @@ export default function Testimonials() {
       role: "Owner of Vats Kunj",
       image: "/images/sunita.jpg",
       quote:
-        "Being an SDM in Dhaulana, UP, it was tough for me to travel every day to Noida for home construction supervision. Thikedaar.Com provided us with top-notch construction solutions. Their expert guidance and transparency in design, materials, and the building process were exceptional. They consistently ensured quality materials at competitive rates. They also helped us with our interiors. We highly recommend Thikedaar.Com.",
+        "Being an SDM in Dhaulana, UP, it was tough for me to travel every day to Noida for home construction supervision. Macnis.Com provided us with top-notch construction solutions. Their expert guidance and transparency in design, materials, and the building process were exceptional. They consistently ensured quality materials at competitive rates. They also helped us with our interiors. We highly recommend Macnis.Com.",
     },
     {
       name: "Ms Puja",
       role: "Owner of Suchita Sadan",
       image: "/images/puja.jpg",
       quote:
-        "For my construction needs in Patna, we received excellent consultation and transparency with important insights on design, material, and process. Thikedaar.Com maintained a regular feedback loop and ensured quality materials at better pricing than local contractors. We highly recommend Thikedaar.Com as a one-stop solution for anyone looking to construct a house in Patna.",
+        "For my construction needs in Patna, we received excellent consultation and transparency with important insights on design, material, and process. Macnis.Com maintained a regular feedback loop and ensured quality materials at better pricing than local contractors. We highly recommend Macnis.Com as a one-stop solution for anyone looking to construct a house in Patna.",
     },
     {
       name: "Mr Venkatesh",
       role: "Owner of Shri Radha Niwas",
       image: "/images/venkatesh.jpg",
       quote:
-        "The team of Thikedaar.Com is organized, collaborative, and problem-solving in their approach. They ensure timely completion of work and submission of inspection requests. Their expertise in construction and ability to suggest changes based on conditions make them valuable team players. I strongly recommend Thikedaar.Com's services and believe they have the potential for growth, expertise, and value for money.",
+        "The team of Macnis.Com is organized, collaborative, and problem-solving in their approach. They ensure timely completion of work and submission of inspection requests. Their expertise in construction and ability to suggest changes based on conditions make them valuable team players. I strongly recommend Macnis.Com's services and believe they have the potential for growth, expertise, and value for money.",
     },
   ];
 

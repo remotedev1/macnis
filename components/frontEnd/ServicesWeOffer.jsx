@@ -7,14 +7,14 @@ export default function ServicesWeOffer() {
     {
       title: "Residential Construction",
       description:
-        "Your idea, our work. Build your customized dream home with Thikedaar.Com's expert craftsmanship tailored to your vision and lifestyle.",
+        "Your idea, our work. Build your customized dream home with Macnis.Com's expert craftsmanship tailored to your vision and lifestyle.",
       image: "/images/residential.jpg",
       link: "/services/residential",
     },
     {
       title: "Commercial Construction",
       description:
-        "From business complexes to hotels, Thikedaar.Com delivers superior quality and efficiency in commercial construction, ensuring it reflects professionalism and functionality.",
+        "From business complexes to hotels, Macnis.Com delivers superior quality and efficiency in commercial construction, ensuring it reflects professionalism and functionality.",
       image: "/images/commercial.jpg",
       link: "/services/commercial",
     },
@@ -28,7 +28,7 @@ export default function ServicesWeOffer() {
     {
       title: "Maintenance",
       description:
-        "Ensure the longevity and optimal performance of your property with Thikedaar.Com's comprehensive building maintenance services. We help you keep your investment in top condition.",
+        "Ensure the longevity and optimal performance of your property with Macnis.Com's comprehensive building maintenance services. We help you keep your investment in top condition.",
       image: "/images/maintenance.jpg",
       link: "/services/maintenance",
     },

@@ -6,10 +6,10 @@ export default function WhyChoose() {
     <section className="py-16 bg-white text-gray-800">
       <div className="container mx-auto px-6 text-center">
         <h2 className="text-4xl font-extrabold mb-4">
-          Why Choose <span className="text-yellow-500">Thikedaar.Com</span>
+          Why Choose <span className="text-yellow-500">Macnis.Com</span>
         </h2>
         <p className="text-gray-600 max-w-3xl mx-auto mb-12">
-          At Thikedaar.Com, we transform your home construction dreams into reality with our expert team & seamless process. From design to delivery, we ensure quality & transparency at every step of the way. Our mission is to build homes that embody your vision, constructed with top-notch craftsmanship & innovative technology.
+          At Macnis.Com, we transform your home construction dreams into reality with our expert team & seamless process. From design to delivery, we ensure quality & transparency at every step of the way. Our mission is to build homes that embody your vision, constructed with top-notch craftsmanship & innovative technology.
         </p>
         <div className="grid gap-8 md:grid-cols-3">
           <div className="p-6 bg-gray-50 rounded-xl border-l-4 border-yellow-500 shadow-sm text-left">

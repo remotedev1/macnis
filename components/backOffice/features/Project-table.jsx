@@ -19,34 +19,122 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import Swal from "sweetalert2";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ImageUpload } from "./Image-upload";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import Swal from "sweetalert2";
+import { Loader } from "@/components/common/Loader";
 
 const projectSchema = z.object({
   projectName: z.string().min(1, "Project name is required"),
-  projectType: z.enum([
-    "RESIDENTIAL",
-    "COMMERCIAL",
-    "INDUSTRIAL",
-    "INSTITUTIONAL",
-    "INFRASTRUCTURE",
-    "MIXED_USE",
-  ]),
-  location: z.string().min(1),
-  status: z.enum(["ACTIVE", "NEAR_COMPLETION", "COMPLETED"]),
-  objectives: z.array(z.string().min(1)),
+  projectType: z.enum(
+    [
+      "RESIDENTIAL",
+      "COMMERCIAL",
+      "INDUSTRIAL",
+      "INSTITUTIONAL",
+      "INFRASTRUCTURE",
+      "MIXED_USE",
+    ],
+    { required_error: "Project type is required" }
+  ),
+  location: z.string().min(1, "Location is required"),
+  status: z.enum(["ACTIVE", "NEAR_COMPLETION", "COMPLETED"], {
+    required_error: "Status is required",
+  }),
+  overview: z.string().min(1, "Overview is required"),
+  objectives: z.array(z.string()),
   keyFeatures: z.array(
     z.object({
-      title: z.string().min(1),
-      description: z.string().min(1),
+      title: z.string(),
+      description: z.string(),
     })
   ),
-  technologiesUsed: z.array(z.string()),
-  imageGallery: z.array(z.string().url().or(z.string().min(1))),
-  videos: z.array(z.string().url().or(z.string().min(1))),
+  technologiesUsed: z.array(z.string().min(1)),
+  imageGallery: z.array(
+    z.union([
+      // Case 1: Uploaded file
+      z.instanceof(File),
+
+      // Case 2: Saved image object
+      z.object({
+        url: z.string().url(),
+        fileId: z.string(),
+      }),
+    ])
+  ),
+  deletedFileIds: z.array(z.string()).optional(),
+  youtubeLinks: z.array(z.string().min(1)),
+  instagramLinks: z.array(z.string().min(1)),
 });
+
+// Chip input component
+const ChipInput = ({ label, name, addChip, removeChip, values }) => {
+  const [inputValue, setInputValue] = useState("");
+  return (
+    <div className="space-y-2">
+      <FormLabel>{label}</FormLabel>
+      <div className="flex flex-wrap gap-2">
+        {values.map((val, idx) => (
+          <span
+            key={idx}
+            className="px-2 py-1 bg-muted rounded-full flex items-center gap-1 text-sm"
+          >
+            {val}
+            <button
+              type="button"
+              className="text-destructive hover:text-destructive/80"
+              onClick={() => removeChip(name, idx)}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+      <Input
+        placeholder={`Add ${label.toLowerCase()}, press enter to add more`}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addChip(name, inputValue);
+            setInputValue("");
+          }
+        }}
+      />
+    </div>
+  );
+};
+
+// Auto-expand Textarea
+const AutoTextarea = ({ field, ...props }) => {
+  const [height, setHeight] = useState("auto");
+  const handleChange = (e) => {
+    setHeight("auto");
+    setHeight(`${e.target.scrollHeight}px`);
+    field.onChange(e);
+  };
+  return (
+    <Textarea
+      {...field}
+      {...props}
+      style={{ height }}
+      onChange={handleChange}
+    />
+  );
+};
 
 export default function ProjectsTable() {
   const [projects, setProjects] = useState([]);
@@ -60,19 +148,17 @@ export default function ProjectsTable() {
       projectType: "RESIDENTIAL",
       location: "",
       status: "ACTIVE",
-      objectives: [""],
-      keyFeatures: [{ title: "", description: "" }],
+      overview: "",
+      objectives: [],
+      keyFeatures: [],
       technologiesUsed: [],
       imageGallery: [],
-      videos: [],
+      deletedFileIds: [],
+      youtubeLinks: [],
+      instagramLinks: [],
     },
   });
 
-  // Field arrays
-  const objectivesField = useFieldArray({
-    control: form.control,
-    name: "objectives",
-  });
   const keyFeaturesField = useFieldArray({
     control: form.control,
     name: "keyFeatures",
@@ -85,63 +171,81 @@ export default function ProjectsTable() {
   const fetchProjects = async () => {
     setLoading(true);
     const res = await fetch("/api/projects");
-    const data = await res.json();
-    setProjects(data);
+    setProjects(await res.json());
     setLoading(false);
   };
 
   const onSubmit = async (values) => {
-    if (editingId) {
-      await fetch(`/api/projects/${editingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+    try {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, val]) => {
+        if (key === "imageGallery") {
+          val.forEach((file) => formData.append("imageGallery", file));
+        } else {
+          formData.append(
+            key,
+            typeof val === "string" ? val : JSON.stringify(val)
+          );
+        }
       });
-      Swal.fire("Updated!", "Project updated successfully.", "success");
-    } else {
-      await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+      formData.append(
+        "deletedFileIds",
+        JSON.stringify(values.deletedFileIds || [])
+      );
+
+      const url = editingId ? `/api/projects/${editingId}` : "/api/projects";
+      const method = editingId ? "PUT" : "POST";
+      const res = await fetch(url, { method, body: formData });
+
+      if (!res.ok) throw new Error("Failed to save project");
+      setEditingId(null);
+      // form.reset(form.formState.defaultValues);
+      form.reset({
+        projectName: "",
+        projectType: "RESIDENTIAL",
+        location: "",
+        status: "ACTIVE",
+        overview: "",
+        objectives: [],
+        keyFeatures: [],
+        technologiesUsed: [],
+        imageGallery: [],
+        deletedFileIds: [],
+        youtubeLinks: [],
+        instagramLinks: [],
       });
-      Swal.fire("Created!", "Project created successfully.", "success");
+      fetchProjects();
+      Swal.fire(
+        editingId ? "Updated!" : "Created!",
+        `Project ${editingId ? "updated" : "created"} successfully.`,
+        "success"
+      );
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
     }
-    setEditingId(null);
-    form.reset();
-    fetchProjects();
   };
 
-  const handleArchive = (id) => {
+  const handleArchive = async (id) => {
     Swal.fire({
       title: "Archive this project?",
-      text: "It will be marked as COMPLETED.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, archive it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         await fetch(`/api/projects/${id}/archive`, { method: "PATCH" });
-        Swal.fire(
-          "Archived!",
-          "The project has been marked completed.",
-          "success"
-        );
         fetchProjects();
       }
     });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     Swal.fire({
       title: "Delete this project?",
-      text: "This action cannot be undone.",
       icon: "error",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         await fetch(`/api/projects/${id}`, { method: "DELETE" });
-        Swal.fire("Deleted!", "The project has been removed.", "success");
         fetchProjects();
       }
     });
@@ -161,185 +265,232 @@ export default function ProjectsTable() {
 
   return (
     <div className="space-y-6">
-      {/* Form Card */}
       <Card>
         <CardHeader>
           <CardTitle>{editingId ? "Edit Project" : "Create Project"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-            <input
-              placeholder="Project Name"
-              {...form.register("projectName")}
-              className="border p-2 rounded"
-            />
-            <Select
-              onValueChange={(v) => form.setValue("projectType", v)}
-              value={form.watch("projectType")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Project Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {[
-                  "RESIDENTIAL",
-                  "COMMERCIAL",
-                  "INDUSTRIAL",
-                  "INSTITUTIONAL",
-                  "INFRASTRUCTURE",
-                  "MIXED_USE",
-                ].map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <input
-              placeholder="Location"
-              {...form.register("location")}
-              className="border p-2 rounded"
-            />
-            <Select
-              onValueChange={(v) => form.setValue("status", v)}
-              value={form.watch("status")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {["ACTIVE", "NEAR_COMPLETION", "COMPLETED"].map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Objectives */}
-            <div>
-              <p className="font-medium">Objectives</p>
-              {objectivesField.fields.map((field, index) => (
-                <div key={field.id} className="flex gap-2 mb-2">
-                  <input
-                    {...form.register(`objectives.${index}`)}
-                    placeholder="Objective"
-                    className="border p-2 rounded flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => objectivesField.remove(index)}
-                  >
-                    X
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" onClick={() => objectivesField.append("")}>
-                + Add Objective
-              </Button>
-            </div>
-
-            {/* Key Features */}
-            <div>
-              <p className="font-medium">Key Features</p>
-              {keyFeaturesField.fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-2 gap-2 mb-2">
-                  <input
-                    {...form.register(`keyFeatures.${index}.title`)}
-                    placeholder="Title"
-                    className="border p-2 rounded"
-                  />
-                  <input
-                    {...form.register(`keyFeatures.${index}.description`)}
-                    placeholder="Description"
-                    className="border p-2 rounded"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="col-span-2"
-                    onClick={() => keyFeaturesField.remove(index)}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                onClick={() =>
-                  keyFeaturesField.append({ title: "", description: "" })
-                }
+          <FormProvider {...form}>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid gap-4 sm:grid-cols-2"
               >
-                + Add Feature
-              </Button>
-            </div>
-
-            {/* Chips for Technologies, Images, Videos */}
-            {["technologiesUsed", "imageGallery", "videos"].map((field) => (
-              <div key={field}>
-                <p className="font-medium">{field}</p>
-                <div className="flex gap-2 flex-wrap mb-2">
-                  {form.watch(field).map((val, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 bg-gray-200 rounded flex items-center gap-1"
-                    >
-                      {val}
-                      <button
-                        type="button"
-                        onClick={() => removeChip(field, idx)}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <input
-                  placeholder={`Add to ${field}`}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addChip(field, e.currentTarget.value);
-                      e.currentTarget.value = "";
-                    }
-                  }}
-                  className="border p-2 rounded"
+                {/* Project Name */}
+                <FormField
+                  control={form.control}
+                  name="projectName"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2 sm:col-span-1">
+                      <FormLabel>Project Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Project Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            ))}
+                {/* Project Type */}
+                <FormField
+                  control={form.control}
+                  name="projectType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Type</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[
+                            "RESIDENTIAL",
+                            "COMMERCIAL",
+                            "INDUSTRIAL",
+                            "INSTITUTIONAL",
+                            "INFRASTRUCTURE",
+                            "MIXED_USE",
+                          ].map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Location */}
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Location" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Status */}
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["ACTIVE", "NEAR_COMPLETION", "COMPLETED"].map(
+                            (s) => (
+                              <SelectItem key={s} value={s}>
+                                {s}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Overview */}
+                <FormField
+                  control={form.control}
+                  name="overview"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Overview</FormLabel>
+                      <FormControl>
+                        <AutoTextarea
+                          placeholder="Write a brief overview..."
+                          field={field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="flex gap-2">
-              <Button type="submit">{editingId ? "Update" : "Create"}</Button>
-              {editingId && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    form.reset();
-                    setEditingId(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-              )}
-            </div>
-          </form>
+                {/* Chips */}
+                <div className="col-span-2 space-y-4">
+                  <ChipInput
+                    label="objectives"
+                    name="objectives"
+                    addChip={addChip}
+                    removeChip={removeChip}
+                    values={form.watch("objectives")}
+                  />
+                  <ChipInput
+                    label="Technologies Used"
+                    name="technologiesUsed"
+                    addChip={addChip}
+                    removeChip={removeChip}
+                    values={form.watch("technologiesUsed")}
+                  />
+                  <ChipInput
+                    label="YouTube Links"
+                    name="youtubeLinks"
+                    addChip={addChip}
+                    removeChip={removeChip}
+                    values={form.watch("youtubeLinks")}
+                  />
+                  <ChipInput
+                    label="Instagram Links"
+                    name="instagramLinks"
+                    addChip={addChip}
+                    removeChip={removeChip}
+                    values={form.watch("instagramLinks")}
+                  />
+                </div>
+                {/* Key Features */}
+                <div className="col-span-2 space-y-4">
+                  <FormLabel>Key Features</FormLabel>
+                  {keyFeaturesField.fields.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className="grid grid-cols-2 gap-2 items-start"
+                    >
+                      <Input
+                        placeholder="Feature Title"
+                        {...form.register(`keyFeatures.${index}.title`)}
+                      />
+                      <Input
+                        placeholder="Feature Description"
+                        {...form.register(`keyFeatures.${index}.description`)}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => keyFeaturesField.remove(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      keyFeaturesField.append({ title: "", description: "" })
+                    }
+                  >
+                    Add Feature
+                  </Button>
+                </div>
+                {/* Images */}
+                <div className="col-span-2">
+                  <ImageUpload name="imageGallery" />
+                </div>
+                {/* Submit */}
+                <div className="col-span-2 flex gap-2">
+                  {form.formState.isSubmitting ? (
+                    <Loader />
+                  ) : (
+                    <Button type="submit" className="flex-1">
+                      {editingId ? "Update" : "Create"}
+                    </Button>
+                  )}
+                  {editingId && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        form.reset();
+                        setEditingId(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </Form>
+          </FormProvider>
         </CardContent>
       </Card>
-
-      {/* Table */}
+      {/* Projects List */}
       <Card>
         <CardHeader>
           <CardTitle>Projects</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-8 w-full" />
-              ))}
-            </div>
+            [...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-8 w-full mb-2" />
+            ))
           ) : (
             <Table>
               <TableHeader>
@@ -358,7 +509,7 @@ export default function ProjectsTable() {
                     <TableCell>{p.projectType}</TableCell>
                     <TableCell>{p.location}</TableCell>
                     <TableCell>{p.status}</TableCell>
-                    <TableCell className="flex gap-2">
+                    <TableCell className="flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         variant="outline"

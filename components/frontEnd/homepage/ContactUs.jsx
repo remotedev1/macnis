@@ -19,7 +19,7 @@ export default function ContactUs() {
             </div>
             <div className="flex items-center gap-2 text-gray-800">
               <Mail className="text-yellow-500" />
-              <span className="font-semibold">Hello@Thikedaar.Com</span>
+              <span className="font-semibold">Hello@Macnis.Com</span>
             </div>
           </div>
         </div>
@@ -28,19 +28,19 @@ export default function ContactUs() {
             {
               title: "Corporate Office (Delhi-NCR Branch):",
               address:
-                "Thikedaar.Com | Home Construction 107, DLF Star Mall, NH 8, Block A, Sector 30, Gurugram (Delhi NCR), Haryana 122001 (India)",
+                "Macnis.Com | Home Construction 107, DLF Star Mall, NH 8, Block A, Sector 30, Gurugram (Delhi NCR), Haryana 122001 (India)",
               link: "#",
             },
             {
               title: "Bihar Branch:",
               address:
-                "Thikedaar.Com | Home Construction 310, 3rd Floor, Patna One Mall, New Dakbunglow Road, Patna, Bihar 800001 (India)",
+                "Macnis.Com | Home Construction 310, 3rd Floor, Patna One Mall, New Dakbunglow Road, Patna, Bihar 800001 (India)",
               link: "#",
             },
             {
               title: "Jharkhand Branch:",
               address:
-                "Thikedaar.Com | Home Construction 4th Floor, SPM Tower, Circular Road, Ranchi, Jharkhand 834001 (India)",
+                "Macnis.Com | Home Construction 4th Floor, SPM Tower, Circular Road, Ranchi, Jharkhand 834001 (India)",
               link: "#",
             },
           ].map((branch, index) => (
