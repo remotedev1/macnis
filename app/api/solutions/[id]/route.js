@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import imageKit from "@/lib/imageKit"; // assuming same setup
+import { imageKit } from "@/lib/imageKit"; // assuming same setup
 
 export async function PATCH(req, { params }) {
   try {
