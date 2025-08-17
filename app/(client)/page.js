@@ -1,5 +1,5 @@
+import ConsultationAd from "@/components/frontEnd/homepage/ConsultationAd";
 import ConsultationModal from "@/components/frontEnd/homepage/ConsultationModel";
-import ConsultationAd from "@/components/frontEnd/homepage/CosultationAd";
 import Hero from "@/components/frontEnd/homepage/Hero";
 import RecentWorks from "@/components/frontEnd/RecentWorks";
 import ServicesWeOffer from "@/components/frontEnd/ServicesWeOffer";
