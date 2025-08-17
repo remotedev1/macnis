@@ -52,6 +52,16 @@ export const sidebarData = {
           icon: PhoneIncoming,
         },
         {
+          title: "Solutions",
+          url: "/dashboard/solutions",
+          icon: Megaphone,
+        },
+        {
+          title: "Projects",
+          url: "/dashboard/projects",
+          icon: Megaphone,
+        },
+        {
           title: "Testimonials",
           url: "/dashboard/testimonials",
           icon: Megaphone,
@@ -68,34 +78,14 @@ export const sidebarData = {
           items: [
             {
               title: "Profile",
-              url: "/settings",
+              url: "/dashboard",
               icon: UserCog,
-            },
-            {
-              title: "Account",
-              url: "/settings/account",
-              icon: Wrench,
-            },
-            {
-              title: "Appearance",
-              url: "/settings/appearance",
-              icon: Palette,
-            },
-            {
-              title: "Notifications",
-              url: "/settings/notifications",
-              icon: Bell,
-            },
-            {
-              title: "Display",
-              url: "/settings/display",
-              icon: MonitorCheck,
             },
           ],
         },
         {
           title: "Help Center",
-          url: "/help-center",
+          url: "/dashboard",
           icon: HelpCircle,
         },
       ],

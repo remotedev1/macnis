@@ -1,43 +1,28 @@
-// File: app/components/ServicesWeOffer.tsx
+"use client";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function ServicesWeOffer() {
-  const services = [
-    {
-      title: "Residential Construction",
-      description:
-        "Your idea, our work. Build your customized dream home with Macnis.Com's expert craftsmanship tailored to your vision and lifestyle.",
-      image: "/images/residential.jpg",
-      link: "/services/residential",
-    },
-    {
-      title: "Commercial Construction",
-      description:
-        "From business complexes to hotels, Macnis.Com delivers superior quality and efficiency in commercial construction, ensuring it reflects professionalism and functionality.",
-      image: "/images/commercial.jpg",
-      link: "/services/commercial",
-    },
-    {
-      title: "Interiors",
-      description:
-        "Right before moving in, we make your house a home with our top-notch interior design service. It is fully customized to reflect your unique style and preferences.",
-      image: "/images/interiors.jpg",
-      link: "/services/interiors",
-    },
-    {
-      title: "Maintenance",
-      description:
-        "Ensure the longevity and optimal performance of your property with Macnis.Com's comprehensive building maintenance services. We help you keep your investment in top condition.",
-      image: "/images/maintenance.jpg",
-      link: "/services/maintenance",
-    },
-  ];
+  const [services, setServices] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/solutions");
+        const solutions = await response.json();
+        setServices(solutions);
+      } catch (error) {
+        console.error("Error fetching solutions:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
-    <section className="py-16 bg-white text-gray-800">
+    <section className="py-8 bg-white text-gray-800">
       <div className="container mx-auto px-6 text-center">
-        <h2 className="text-4xl font-extrabold mb-2">
+        <h2 className="text-4xl font-extrabold mb-12">
           Services <span className="text-yellow-500">We Offer</span>
         </h2>
         <Link
@@ -53,7 +38,7 @@ export default function ServicesWeOffer() {
               className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition text-left"
             >
               <Image
-                src={service.image}
+                src={service.image[0].url}
                 alt={service.title}
                 width={400}
                 height={250}
@@ -64,12 +49,6 @@ export default function ServicesWeOffer() {
                 <p className="text-sm text-gray-600 mb-4">
                   {service.description}
                 </p>
-                <Link
-                  href={service.link}
-                  className="text-yellow-500 font-semibold inline-flex items-center hover:underline"
-                >
-                  Know More →
-                </Link>
               </div>
             </div>
           ))}

@@ -2,7 +2,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function ContactUs() {
   return (
-    <section className="bg-gray-500 pt-16 rounded-t-2xl shadow-lg relative z-10">
+    <section className="bg-gray-300 pt-10 shadow-lg relative z-10">
       <div className="max-w-[900px] relative top-8 mx-auto bg-white p-10 rounded-xl">
         <div className="text-center mb-10">
           <h3 className="text-3xl font-bold text-gray-900">
@@ -15,7 +15,7 @@ export default function ContactUs() {
           <div className="flex justify-center items-center gap-6 mt-6">
             <div className="flex items-center gap-2 text-gray-800">
               <Phone className="text-yellow-500" />
-              <span className="font-semibold">078590 43737</span>
+              <span className="font-semibold">0546546541654654</span>
             </div>
             <div className="flex items-center gap-2 text-gray-800">
               <Mail className="text-yellow-500" />

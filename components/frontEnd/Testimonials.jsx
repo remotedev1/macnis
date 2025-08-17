@@ -1,33 +1,22 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 
 export default function Testimonials() {
-  const testimonials = [
-    {
-      name: "SDM Sunita",
-      role: "Owner of Vats Kunj",
-      image: "/images/sunita.jpg",
-      quote:
-        "Being an SDM in Dhaulana, UP, it was tough for me to travel every day to Noida for home construction supervision. Macnis.Com provided us with top-notch construction solutions. Their expert guidance and transparency in design, materials, and the building process were exceptional. They consistently ensured quality materials at competitive rates. They also helped us with our interiors. We highly recommend Macnis.Com.",
-    },
-    {
-      name: "Ms Puja",
-      role: "Owner of Suchita Sadan",
-      image: "/images/puja.jpg",
-      quote:
-        "For my construction needs in Patna, we received excellent consultation and transparency with important insights on design, material, and process. Macnis.Com maintained a regular feedback loop and ensured quality materials at better pricing than local contractors. We highly recommend Macnis.Com as a one-stop solution for anyone looking to construct a house in Patna.",
-    },
-    {
-      name: "Mr Venkatesh",
-      role: "Owner of Shri Radha Niwas",
-      image: "/images/venkatesh.jpg",
-      quote:
-        "The team of Macnis.Com is organized, collaborative, and problem-solving in their approach. They ensure timely completion of work and submission of inspection requests. Their expertise in construction and ability to suggest changes based on conditions make them valuable team players. I strongly recommend Macnis.Com's services and believe they have the potential for growth, expertise, and value for money.",
-    },
-  ];
+  const [testimonials, setTestimonials] = useState([]);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      const response = await fetch("/api/testimonials");
+      const data = await response.json();
+      setTestimonials(data);
+    };
+
+    fetchTestimonials();
+  }, []);
 
   const responsive = {
     desktop: {
@@ -58,14 +47,14 @@ export default function Testimonials() {
           keyBoardControl
           showDots={false}
         >
-          {testimonials.map((testimonial, index) => (
+          {testimonials?.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl shadow p-6 mx-2 flex flex-col items-center text-center"
+              className="bg-white rounded-xl shadow p-6 mx-2 flex flex-col items-center text-center m-5"
             >
               <p className="text-gray-600 mb-6 italic">“{testimonial.quote}”</p>
               <Image
-                src={testimonial.image}
+                src={testimonial.image || "/placeholder.jpg"}
                 alt={testimonial.name}
                 width={60}
                 height={60}

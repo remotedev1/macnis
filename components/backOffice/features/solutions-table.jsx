@@ -22,15 +22,15 @@ import {
 } from "@/components/ui/select";
 import Swal from "sweetalert2";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import axios from "axios";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { TestimonialSchema } from "@/schemas";
+import { SolutionsSchema } from "@/schemas";
+import { Loader } from "@/components/common/Loader";
+import { ImageUpload } from "./Image-upload";
 
-export default function TestimonialsDashboard() {
-  const [testimonials, setTestimonials] = useState([]);
+export default function SolutionsDashboard() {
+  const [solutions, setSolutions] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -38,49 +38,63 @@ export default function TestimonialsDashboard() {
   const [loadingList, setLoadingList] = useState(true);
 
   const form = useForm({
-    resolver: zodResolver(TestimonialSchema),
-    defaultValues: { name: "", role: "", image: "", quote: "" },
+    resolver: zodResolver(SolutionsSchema),
+    defaultValues: { title: "", description: "", image: "" },
   });
 
-  const fetchTestimonials = async () => {
+  const fetchSolutions = async () => {
     try {
       setLoadingList(true);
-      const res = await axios.get("/api/testimonials");
-      setTestimonials(res.data);
+      const res = await fetch("/api/solutions");
+      if (!res.ok) throw new Error("Failed to fetch solutions");
+      const data = await res.json();
+      setSolutions(data);
     } finally {
       setLoadingList(false);
     }
   };
 
   useEffect(() => {
-    fetchTestimonials();
+    fetchSolutions();
   }, []);
 
   const onSubmit = async (values) => {
     try {
       setLoading(true);
-      if (editingId) {
-        await axios.patch(`/api/testimonials/${editingId}`, values);
-        Swal.fire("Updated!", "Testimonial updated successfully", "success");
-      } else {
-        await axios.post("/api/testimonials", values);
-        Swal.fire("Created!", "Testimonial created successfully", "success");
-      }
-      setEditingId(null);
-      form.reset({
-        name: "",
-        role: "",
-        image: "",
-        quote: "",
+      const formData = new FormData();
+
+      Object.entries(values).forEach(([key, val]) => {
+        if (key === "image") {
+          val.forEach((file) => formData.append("image", file));
+        } else {
+          formData.append(
+            key,
+            typeof val === "string" ? val : JSON.stringify(val)
+          );
+        }
       });
 
-      fetchTestimonials();
-    } catch (err) {
+      const url = editingId ? `/api/solutions/${editingId}` : "/api/solutions";
+      const method = editingId ? "PATCH" : "POST";
+      const res = await fetch(url, { method, body: formData });
+      if (!res.ok) throw new Error("Failed to save solution");
+
+      setEditingId(null);
+      form.reset({
+        title: "",
+        description: "",
+        image: "",
+      });
+
+      fetchSolutions();
+
       Swal.fire(
-        "Error",
-        err.response?.data?.error || "Something went wrong",
-        "error"
+        editingId ? "Updated!" : "Created!",
+        `Solution ${editingId ? "updated" : "created"} successfully.`,
+        "success"
       );
+    } catch (err) {
+      Swal.fire("Error", err.message || "Something went wrong", "error");
     } finally {
       setLoading(false);
     }
@@ -88,7 +102,7 @@ export default function TestimonialsDashboard() {
 
   const handleArchive = async (id, isArchived) => {
     Swal.fire({
-      title: isArchived ? "Unarchive testimonial?" : "Archive testimonial?",
+      title: isArchived ? "Unarchive solution?" : "Archive solution?",
       text: isArchived
         ? "This will make it visible again"
         : "This will hide it from display",
@@ -97,25 +111,32 @@ export default function TestimonialsDashboard() {
       confirmButtonText: "Yes",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        await axios.patch(`/api/testimonials/${id}`, {
-          isArchived: !isArchived,
-        });
-        fetchTestimonials();
-        Swal.fire(
-          "Done!",
-          isArchived ? "Unarchived successfully" : "Archived successfully",
-          "success"
-        );
+        try {
+          const res = await fetch(`/api/solutions/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isArchived: !isArchived }),
+          });
+          if (!res.ok) throw new Error("Failed to update archive status");
+          fetchSolutions();
+          Swal.fire(
+            "Done!",
+            isArchived ? "Unarchived successfully" : "Archived successfully",
+            "success"
+          );
+        } catch (err) {
+          Swal.fire("Error", err.message || "Something went wrong", "error");
+        }
       }
     });
   };
 
-  const filteredTestimonials = testimonials.filter((t) => {
+  const filteredSolutions = solutions.filter((t) => {
     const matchesStatus =
       filterStatus === "all" ||
       (filterStatus === "active" && !t.isArchived) ||
       (filterStatus === "archived" && t.isArchived);
-    const matchesSearch = t.name
+    const matchesSearch = t.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
@@ -127,44 +148,43 @@ export default function TestimonialsDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {editingId ? "Edit Testimonial" : "Create Testimonial"}
+            {editingId ? "Edit Solution" : "Create Solution"}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <Input placeholder="Name" {...form.register("name")} />
-            {form.formState.errors.name && (
-              <p className="text-red-500">
-                {form.formState.errors.name.message}
-              </p>
-            )}
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <Input placeholder="Title" {...form.register("title")} />
+              {form.formState.errors.title && (
+                <p className="text-red-500">
+                  {form.formState.errors.title.message}
+                </p>
+              )}
+              <Input
+                placeholder="Description"
+                {...form.register("description")}
+              />
+              {form.formState.errors.description && (
+                <p className="text-red-500">
+                  {form.formState.errors.description.message}
+                </p>
+              )}
 
-            <Input placeholder="Role" {...form.register("role")} />
-            {form.formState.errors.role && (
-              <p className="text-red-500">
-                {form.formState.errors.role.message}
-              </p>
-            )}
+              {/* Image */}
+              <div className="col-span-2">
+                <ImageUpload name="image" multiple={false} />
+              </div>
 
-            <Input placeholder="Image URL" {...form.register("image")} />
-            {form.formState.errors.image && (
-              <p className="text-red-500">
-                {form.formState.errors.image.message}
-              </p>
-            )}
-
-            <Textarea placeholder="Quote" {...form.register("quote")} />
-            {form.formState.errors.quote && (
-              <p className="text-red-500">
-                {form.formState.errors.quote.message}
-              </p>
-            )}
-
-            <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {editingId ? "Update" : "Create"}
-            </Button>
-          </form>
+              {form.formState.isSubmitting ? (
+                <Loader />
+              ) : (
+                <Button type="submit" className="flex-1">
+                  {editingId ? "Update" : "Create"}
+                </Button>
+              )}
+            </form>
+          </FormProvider>
         </CardContent>
       </Card>
 
@@ -182,7 +202,7 @@ export default function TestimonialsDashboard() {
         </Select>
 
         <Input
-          placeholder="Search testimonials..."
+          placeholder="Search Solutions..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-[250px]"
@@ -192,33 +212,31 @@ export default function TestimonialsDashboard() {
       {/* Table Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Testimonials</CardTitle>
+          <CardTitle>Solutions</CardTitle>
         </CardHeader>
         <CardContent>
           {loadingList ? (
             <Skeleton className="h-10 w-full" />
-          ) : filteredTestimonials.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No testimonials found.
-            </p>
+          ) : filteredSolutions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No Solutions found.</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Quote</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Desc</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTestimonials.map((t) => (
+                {filteredSolutions.map((t) => (
                   <TableRow key={t.id}>
-                    <TableCell>{t.name}</TableCell>
-                    <TableCell>{t.role}</TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {t.quote}
+                    <TableCell>{t.title}</TableCell>
+                    <TableCell>
+                      {t.description.length > 5
+                        ? `${t.description.slice(0, 5)}...`
+                        : t.description}
                     </TableCell>
                     <TableCell>
                       <Badge variant={t.isArchived ? "secondary" : "default"}>

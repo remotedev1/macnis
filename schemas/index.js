@@ -1,3 +1,4 @@
+import { title } from "process";
 import * as z from "zod";
 
 const IndianPhoneNumberRegex = /^[6789]\d{9}$/;
@@ -31,6 +32,23 @@ export const TestimonialSchema = z.object({
     .or(z.literal("")), // allow empty string if you sometimes pass "" instead of undefined
   quote: z.string().min(1, "Quote is required"),
   isArchived: z.boolean().optional(),
+});
+export const SolutionsSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  isArchived: z.boolean().optional(),
+  image: z.array(
+      z.union([
+        // Case 1: Uploaded file
+        z.instanceof(File),
+  
+        // Case 2: Saved image object
+        z.object({
+          url: z.string().url(),
+          fileId: z.string(),
+        }),
+      ])
+    ).optional(),
 });
 
 export const SettingsSchema = z
