@@ -40,7 +40,9 @@ export default function Header() {
       >
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <Image src="/logo.png" alt="Logo" width={75} height={75} />
+          <Link href="/" className="no-underline cursor-pointer">
+            <Image src="/logo.png" alt="Logo" width={75} height={75} />
+          </Link>
         </div>
 
         {/* Right side */}

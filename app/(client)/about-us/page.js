@@ -30,27 +30,26 @@ const aboutTimeline = [
 export default function AboutSection() {
   return (
     <section className="bg-white pb-5">
-      <Container>
-        {/* Hero / Header */}
-        <div className="relative bg-black text-white py-16">
-          <div className="container mx-auto text-center px-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              About <span className="text-yellow-500">Us</span>
-            </h1>
-            <p className="max-w-3xl mx-auto text-sm md:text-base">
-              Welcome to Macnis.Com, your premier destination for all-inclusive
-              construction solutions. We have redefined the construction
-              experience, ensuring it is streamlined, transparent, and
-              accessible. Our commitment to excellence and innovation makes us
-              the ideal choice for all your building needs. As India’s first
-              construction company with a digital service portal, we provide a
-              seamless platform for clients to plan, design, build, and maintain
-              their dream homes, tailored to their budget and requirements, all
-              at the touch of a screen.
-            </p>
-          </div>
+      {/* Hero / Header */}
+      <div className="relative bg-black text-white py-16">
+        <div className="container mx-auto text-center px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            About <span className="text-yellow-500">Us</span>
+          </h1>
+          <p className="max-w-3xl mx-auto text-sm md:text-base">
+            Welcome to Macnis.Com, your premier destination for all-inclusive
+            construction solutions. We have redefined the construction
+            experience, ensuring it is streamlined, transparent, and accessible.
+            Our commitment to excellence and innovation makes us the ideal
+            choice for all your building needs. As India’s first construction
+            company with a digital service portal, we provide a seamless
+            platform for clients to plan, design, build, and maintain their
+            dream homes, tailored to their budget and requirements, all at the
+            touch of a screen.
+          </p>
         </div>
-
+      </div>
+      <Container>
         {/* Timeline Section */}
         <div className="max-w-[70vw] mx-auto py-16 px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black">
@@ -94,7 +93,6 @@ export default function AboutSection() {
             </div>
           </div>
         </div>
-        <WhyChoose />
       </Container>
     </section>
   );

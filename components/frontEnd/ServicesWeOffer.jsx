@@ -3,17 +3,26 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Container from "../common/GlobalContainer";
+import CardSkeleton from "../common/CardSkeleton";
 
 export default function ServicesWeOffer() {
   const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true); // 👈 loading state
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("/api/solutions");
         const solutions = await response.json();
-        setServices(solutions);
+
+        // delay showing data
+        setTimeout(() => {
+          setServices(solutions);
+          setLoading(false); // 👈 stop loading AFTER delay
+        }, 3000);
       } catch (error) {
         console.error("Error fetching solutions:", error);
+        setLoading(false); // 👈 still stop loading on error
       }
     };
 
@@ -21,36 +30,45 @@ export default function ServicesWeOffer() {
   }, []);
 
   return (
-    <section className=" bg-white text-gray-800">
+    <section className="bg-white text-gray-800">
       <Container>
-        <div className=" px-6 text-center">
+        <div className="px-6 text-center">
           <h2 className="text-4xl font-extrabold mb-12">
             Services <span className="text-yellow-500">We Offer</span>
           </h2>
 
-          <div className="grid gap-8  md:grid-cols-4">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition text-left"
-              >
-                <Image
-                  src={service.image[0].url}
-                  alt={service.title}
-                  width={400}
-                  height={250}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-bold mb-2">{service.title}</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {service.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div className="grid gap-8 md:grid-cols-4">
+            {loading
+              ? // 👇 Show 4 skeleton cards while loading
+                Array.from({ length: 4 }).map((_, i) => (
+                  <CardSkeleton key={i} withMedia />
+                ))
+              : // 👇 Show actual services when loaded
+                services.map((service, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition text-left"
+                  >
+                    <Image
+                      src={service.image[0].url}
+                      alt={service.title}
+                      width={400}
+                      height={250}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="p-4">
+                      <h3 className="text-lg font-bold mb-2">
+                        {service.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        {service.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
           </div>
         </div>
+
         <div className="text-center mt-8">
           <Link
             href="/services"

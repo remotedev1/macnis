@@ -43,7 +43,6 @@ export const login = async (values, callbackUrl) => {
       // Set token expiration to 1 minute from
       const tokenData = await generateVerificationToken(email);
 
-
       if (!tokenData?.token) {
         return {
           error: tokenData?.error,
@@ -89,9 +88,6 @@ export const login = async (values, callbackUrl) => {
           };
       }
     }
-    // Re-throw other unexpected errors (e.g., network issues, database problems)
-    // so they can be caught by a global error handler or logged appropriately.
-    console.error("Unhandled login error:", error);
     throw error;
   }
 };
