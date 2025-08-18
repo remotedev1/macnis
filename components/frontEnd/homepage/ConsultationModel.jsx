@@ -18,7 +18,7 @@ export default function ConsultationModal() {
   useEffect(() => {
     const timer = setTimeout(() => {
       const times = Number(Cookies.get("consultation_modal_times") || "0");
-      if (times < 3) {
+      if (times < 20) {
         setOpen(true); // Opens modal after 10s
         Cookies.set("consultation_modal_times", String(times + 1), {
           expires: 30, // Cookie expires in 30 days
@@ -31,10 +31,13 @@ export default function ConsultationModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl w-full p-0 bg-black shadow-xl border-0">
+      <DialogContent className="max-w-2xl w-full p-0 bg-black shadow-xl border-0 text-white">
         <ConsultationForm />
         <DialogClose asChild>
-          <Button variant="ghost" className="mt-4 w-full">
+          <Button
+            variant="ghost"
+            className="mb-2 w-[80%] mx-auto bg-white text-black"
+          >
             Close
           </Button>
         </DialogClose>

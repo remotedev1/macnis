@@ -54,7 +54,7 @@ export default function ConsultationForm() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 rounded-2xl text-white">
+    <div className="max-w-xl mx-auto p-6 rounded-2xl text-white">
       <h2 className="text-3xl font-extrabold text-yellow-400 mb-6">
         Request Free Tech Consultation
       </h2>

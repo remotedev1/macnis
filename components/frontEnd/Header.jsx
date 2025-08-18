@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import {  Menu, User } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"; // adjust path if needed
 import clsx from "clsx";
 import Link from "next/link";
+import Container from "../common/GlobalContainer";
 
 export default function Header() {
   const [isFixed, setIsFixed] = useState(false);
@@ -29,12 +30,12 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   return (
-    <>
-      <div className="h-16 lg:h-20" />
+    <Container>
+      <div className="h-[107px] lg:h-20" />
       <header
         className={clsx(
-          "fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 lg:px-20 py-4 transition-colors duration-500 ease-in-out",
-          isFixed ? "bg-white shadow-md" : "bg-black/50 backdrop-blur-md"
+          "fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 md:px-10 lg:px-20 xl:px-38 py-4 transition-colors duration-500 ease-in-out",
+          isFixed ? "bg-white shadow-md" : "bg-black backdrop-blur-md"
         )}
       >
         {/* Logo */}
@@ -82,6 +83,6 @@ export default function Header() {
           </Link>
         </div>
       </header>
-    </>
+    </Container>
   );
 }

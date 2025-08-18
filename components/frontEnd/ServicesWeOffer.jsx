@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import Container from "../common/GlobalContainer";
 
 export default function ServicesWeOffer() {
   const [services, setServices] = useState([]);
@@ -20,40 +21,45 @@ export default function ServicesWeOffer() {
   }, []);
 
   return (
-    <section className="py-8 bg-white text-gray-800">
-      <div className="container mx-auto px-6 text-center">
-        <h2 className="text-4xl font-extrabold mb-12">
-          Services <span className="text-yellow-500">We Offer</span>
-        </h2>
-        <Link
-          href="/services"
-          className="inline-block bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold mb-12 hover:bg-yellow-600 transition"
-        >
-          See All Services
-        </Link>
-        <div className="grid gap-8 md:grid-cols-4">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition text-left"
-            >
-              <Image
-                src={service.image[0].url}
-                alt={service.title}
-                width={400}
-                height={250}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-2">{service.title}</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  {service.description}
-                </p>
+    <section className=" bg-white text-gray-800">
+      <Container>
+        <div className=" px-6 text-center">
+          <h2 className="text-4xl font-extrabold mb-12">
+            Services <span className="text-yellow-500">We Offer</span>
+          </h2>
+
+          <div className="grid gap-8  md:grid-cols-4">
+            {services.map((service, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition text-left"
+              >
+                <Image
+                  src={service.image[0].url}
+                  alt={service.title}
+                  width={400}
+                  height={250}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="text-lg font-bold mb-2">{service.title}</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {service.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+        <div className="text-center mt-8">
+          <Link
+            href="/services"
+            className="inline-block bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold mb-12 hover:bg-yellow-600 transition"
+          >
+            See All Services
+          </Link>
+        </div>
+      </Container>
     </section>
   );
 }

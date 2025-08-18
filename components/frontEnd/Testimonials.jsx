@@ -1,9 +1,33 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import Container from "../common/GlobalContainer";
+import { ConstructionTestimonialCard } from "./TestimonialsCard";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const CustomLeftArrow = ({ onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-2 hover:bg-gray-100 transition"
+    >
+      <ChevronLeft size={24} className="text-black" />
+    </button>
+  );
+};
+
+const CustomRightArrow = ({ onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-2 hover:bg-gray-100 transition"
+    >
+      <ChevronRight size={24} className="text-black" />
+    </button>
+  );
+};
 
 export default function Testimonials() {
   const [testimonials, setTestimonials] = useState([]);
@@ -34,38 +58,32 @@ export default function Testimonials() {
   };
 
   return (
-    <section className="py-16 bg-white text-gray-800">
-      <div className="container mx-auto px-6 text-center">
-        <h2 className="text-4xl font-extrabold mb-12">
-          Quotes From <span className="text-yellow-500">Happy Clients</span>
-        </h2>
-        <Carousel
-          responsive={responsive}
-          infinite
-          autoPlay
-          autoPlaySpeed={4000}
-          keyBoardControl
-          showDots={false}
-        >
-          {testimonials?.map((testimonial, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow p-6 mx-2 flex flex-col items-center text-center m-5"
-            >
-              <p className="text-gray-600 mb-6 italic">“{testimonial.quote}”</p>
-              <Image
-                src={testimonial.image || "/placeholder.jpg"}
-                alt={testimonial.name}
-                width={60}
-                height={60}
-                className="rounded-full mb-4 object-cover"
+    <section className="py-8 bg-white text-gray-800">
+      <Container>
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-extrabold mb-12">
+            Quotes From <span className="text-yellow-500">Happy Clients</span>
+          </h2>
+          <Carousel
+            responsive={responsive}
+            infinite
+            autoPlay
+            autoPlaySpeed={6000}
+            keyBoardControl
+            showDots={false}
+            className="z-10"
+            customLeftArrow={<CustomLeftArrow />}
+            customRightArrow={<CustomRightArrow />}
+          >
+            {testimonials?.map((testimonial, index) => (
+              <ConstructionTestimonialCard
+                key={index}
+                testimonial={testimonial}
               />
-              <h3 className="font-bold text-lg">{testimonial.name}</h3>
-              <p className="text-sm text-gray-500">{testimonial.role}</p>
-            </div>
-          ))}
-        </Carousel>
-      </div>
+            ))}
+          </Carousel>
+        </div>
+      </Container>
     </section>
   );
 }
