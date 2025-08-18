@@ -1,5 +1,4 @@
 import ServicesWeOffer from "@/components/frontEnd/ServicesWeOffer";
-import React from "react";
 
 const page = () => {
   return (
@@ -9,5 +8,4 @@ const page = () => {
   );
 };
 
-export default page;p
-
+export default page;
